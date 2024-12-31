@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- 左侧主要内容 -->
+        <div class="col-md-8">
+            <!-- 餐厅信息卡片 -->
+            <div class="card restaurant-card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title d-flex align-items-center">
+                        {{ restaurant.name }}
+                        <span class="ms-3 rating-tag">
+                            <i class="fas fa-star"></i>
+                            {{ restaurant.avg_rating|floatformat:1 }}
+                        </span>
+                    </h1>
+                    
+                    <!-- 评分概览 -->
+                    <div class="ratings-overview p-4 bg-light rounded-3">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="rating-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">综合评分</h6>
+                                        <span class="rating-value">{{ restaurant.avg_rating|floatformat:1 }}</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" role="progressbar" 
+                                             style="width: calc({{ restaurant.avg_rating }} * 20%)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="rating-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">口味评分</h6>
+                                        <span class="rating-value">{{ restaurant.avg_flavor_rating|floatformat:1 }}</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: calc({{ restaurant.avg_flavor_rating }} * 20%)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="rating-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">环境评分</h6>
+                                        <span class="rating-value">{{ restaurant.avg_env_rating|floatformat:1 }}</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                             style="width: calc({{ restaurant.avg_env_rating }} * 20%)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="rating-box">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0">服务评分</h6>
+                                        <span class="rating-value">{{ restaurant.avg_service_rating|floatformat:1 }}</span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" role="progressbar" 
+                                             style="width: calc({{ restaurant.avg_service_rating }} * 20%)"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-4">
+                            <span class="review-count">
+                                <i class="fas fa-comments me-2"></i>
+                                {{ restaurant.review_count }} 条评价
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 评价列表 -->
+            {% if ratings %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-comment-dots me-2"></i>最新评价
+                    </h5>
+                    <div class="ratings-list">
+                        {% for rating in ratings %}
+                        <div class="rating-item fade-in {% if not forloop.last %}border-bottom{% endif %} mb-4 pb-4">
+                            <div class="rating-header d-flex justify-content-between align-items-center mb-3">
+                                <div class="user-info">
+                                    <i class="fas fa-user-circle me-2"></i>
+                                    <span class="fw-bold">用户 {{ rating.user_id }}</span>
+                                </div>
+                                <div class="rating-meta">
+                                    <span class="rating-overall me-3">
+                                        <i class="fas fa-star text-warning me-1"></i>
+                                        {{ rating.rating }}
+                                    </span>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock me-1"></i>
+                                        {{ rating.timestamp|date:"Y-m-d H:i" }}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="rating-details mb-3">
+                                <div class="row g-2">
+                                    <div class="col-auto">
+                                        <span class="rating-tag">
+                                            <i class="fas fa-utensils"></i>
+                                            口味 {{ rating.rating_flavor }}
+                                        </span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="rating-tag">
+                                            <i class="fas fa-chair"></i>
+                                            环境 {{ rating.rating_env }}
+                                        </span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="rating-tag">
+                                            <i class="fas fa-concierge-bell"></i>
+                                            服务 {{ rating.rating_service }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {% if rating.comment %}
+                            <div class="rating-comment">
+                                <p class="mb-0 text-muted">
+                                    <i class="fas fa-quote-left me-2 opacity-50"></i>
+                                    {{ rating.comment }}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 右侧推荐区 -->
+        <div class="col-md-4">
+            {% if similar_restaurants %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">相似餐厅</h5>
+                    <div class="list-group list-group-flush">
+                        {% for restaurant in similar_restaurants %}
+                        <a href="{% url 'recommender:restaurant_detail' restaurant.rest_id %}" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            {{ restaurant.name }}
+                            <span class="badge bg-primary rounded-pill">{{ restaurant.avg_rating|floatformat:1 }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user.is_authenticated and recommended_restaurants %}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">猜您喜欢</h5>
+                    <div class="list-group list-group-flush">
+                        {% for restaurant in recommended_restaurants %}
+                        <a href="{% url 'recommender:restaurant_detail' restaurant.rest_id %}" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            {{ restaurant.name }}
+                            <span class="badge bg-primary rounded-pill">{{ restaurant.avg_rating|floatformat:1 }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .restaurant-card {
+        border-top: 4px solid var(--accent-color);
+    }
+    
+    .rating-value {
+        font-weight: 600;
+        font-size: 1.1em;
+        color: var(--primary-color);
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: rgba(0,0,0,0.1);
+    }
+    
+    .rating-box {
+        padding: 0.5rem;
+    }
+    
+    .review-count {
+        font-size: 1.1em;
+        color: var(--secondary-color);
+    }
+    
+    .rating-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        background-color: rgba(0,0,0,0.05);
+        color: var(--secondary-color);
+        font-size: 0.9em;
+    }
+    
+    .rating-tag i {
+        margin-right: 0.5rem;
+        color: var(--accent-color);
+    }
+    
+    .rating-item {
+        transition: transform 0.3s ease;
+    }
+    
+    .rating-item:hover {
+        transform: translateX(5px);
+    }
+    
+    .rating-meta {
+        font-size: 0.9em;
+    }
+    
+    .rating-comment {
+        background-color: var(--light-gray);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
+{% endblock %} 

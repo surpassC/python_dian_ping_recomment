@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- 热门餐厅 -->
+    <section class="mb-5">
+        <h2>热门推荐</h2>
+        <div class="row">
+            {% for restaurant in popular_restaurants %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'recommender:restaurant_detail' restaurant.rest_id %}">
+                                {{ restaurant.name }}
+                            </a>
+                        </h5>
+                        <p class="card-text">
+                            <span class="badge bg-primary">{{ restaurant.avg_rating|floatformat:1 }} 分</span>
+                            <small>({{ restaurant.review_count }} 条评价)</small>
+                        </p>
+                        <div class="ratings">
+                            <p>口味: {{ restaurant.avg_flavor_rating|floatformat:1 }}</p>
+                            <p>环境: {{ restaurant.avg_env_rating|floatformat:1 }}</p>
+                            <p>服务: {{ restaurant.avg_service_rating|floatformat:1 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- 各类最佳餐厅 -->
+    <section class="mb-5">
+        <h2>最佳餐厅</h2>
+        <div class="row">
+            {% for category, restaurants in top_rated.items %}
+            <div class="col-md-6 mb-4">
+                <h3>{{ category }}</h3>
+                <div class="list-group">
+                    {% for restaurant in restaurants %}
+                    <a href="{% url 'recommender:restaurant_detail' restaurant.rest_id %}" 
+                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        {{ restaurant.name }}
+                        <span class="badge bg-primary rounded-pill">
+                            {% if category == '综合评分最高' %}
+                                {{ restaurant.avg_rating|floatformat:1 }}
+                            {% elif category == '口味最佳' %}
+                                {{ restaurant.avg_flavor_rating|floatformat:1 }}
+                            {% elif category == '环境优雅' %}
+                                {{ restaurant.avg_env_rating|floatformat:1 }}
+                            {% else %}
+                                {{ restaurant.avg_service_rating|floatformat:1 }}
+                            {% endif %}
+                        </span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    {% if user.is_authenticated and personalized_recommendations %}
+    <!-- 个性化推荐 -->
+    <section class="mb-5">
+        <h2>为您推荐</h2>
+        <div class="row">
+            {% for restaurant in personalized_recommendations %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'recommender:restaurant_detail' restaurant.rest_id %}">
+                                {{ restaurant.name }}
+                            </a>
+                        </h5>
+                        <p class="card-text">
+                            <span class="badge bg-primary">{{ restaurant.avg_rating|floatformat:1 }} 分</span>
+                            <small>({{ restaurant.review_count }} 条评价)</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- 季节推荐部分 -->
+    <section class="mb-5">
+        <div class="container">
+            <div class="section-header d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title">
+                    <i class="fas {% if current_season == '春' %}fa-seedling
+                               {% elif current_season == '夏' %}fa-sun
+                               {% elif current_season == '秋' %}fa-leaf
+                               {% else %}fa-snowflake{% endif %} me-2"></i>
+                    {{ current_season }}季美食推荐
+                </h2>
+                <div class="season-tags">
+                    {% for keyword in season_keywords %}
+                    <span class="badge rounded-pill bg-light text-dark border">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for restaurant in seasonal_restaurants %}
+                <div class="col-md-4">
+                    <div class="card h-100 restaurant-card seasonal-card">
+                        <div class="seasonal-badge">{{ current_season }}季推荐</div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'recommender:restaurant_detail' restaurant.rest_id %}" 
+                                   class="text-decoration-none text-dark">
+                                    {{ restaurant.name }}
+                                </a>
+                            </h5>
+                            <div class="ratings mb-2">
+                                <span class="rating-badge">
+                                    <i class="fas fa-star text-warning"></i>
+                                    {{ restaurant.avg_rating|floatformat:1 }}
+                                </span>
+                                <span class="text-muted ms-2">
+                                    <i class="fas fa-comment-dots"></i>
+                                    {{ restaurant.review_count }}条点评
+                                </span>
+                            </div>
+                            <div class="rating-details">
+                                <div class="rating-item">
+                                    <small>口味</small>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                             style="width: calc({{ restaurant.avg_flavor_rating }} * 20%)"
+                                             aria-valuenow="{{ restaurant.avg_flavor_rating }}" 
+                                             aria-valuemin="0" aria-valuemax="5">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rating-item">
+                                    <small>环境</small>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                             style="width: calc({{ restaurant.avg_env_rating }} * 20%)"
+                                             aria-valuenow="{{ restaurant.avg_env_rating }}" 
+                                             aria-valuemin="0" aria-valuemax="5">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rating-item">
+                                    <small>服务</small>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" role="progressbar" 
+                                             style="width: calc({{ restaurant.avg_service_rating }} * 20%)"
+                                             aria-valuenow="{{ restaurant.avg_service_rating }}" 
+                                             aria-valuemin="0" aria-valuemax="5">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- 添加相关样式 -->
+    <style>
+        .seasonal-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .seasonal-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .seasonal-badge {
+            position: absolute;
+            top: 10px;
+            right: -30px;
+            background: var(--accent-color);
+            color: white;
+            padding: 5px 30px;
+            transform: rotate(45deg);
+            font-size: 0.8em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .season-tags .badge {
+            margin-right: 0.5rem;
+            background-color: rgba(var(--bs-light-rgb), 0.9);
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .season-tags .badge:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .rating-details {
+            margin-top: 1rem;
+        }
+
+        .rating-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-item small {
+            display: block;
+            margin-bottom: 0.2rem;
+            color: var(--secondary-color);
+        }
+
+        .rating-item .progress {
+            height: 6px;
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .rating-badge {
+            background-color: rgba(0,0,0,0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0;
+        }
+    </style>
+</div>
+{% endblock %} 

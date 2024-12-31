@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}餐厅推荐系统{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #e74c3c;
+        --light-gray: #f8f9fa;
+        --dark-gray: #343a40;
+      }
+
+      body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background-color: var(--light-gray);
+        color: var(--dark-gray);
+      }
+
+      /* 导航栏样式 */
+      .navbar {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 1rem 0;
+      }
+
+      .navbar-brand {
+        font-weight: 600;
+        font-size: 1.5rem;
+      }
+
+      .nav-link {
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      /* 卡片样式 */
+      .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        background: white;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      }
+
+      .card-body {
+        padding: 1.5rem;
+      }
+
+      .card-title {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+      }
+
+      .card-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+
+      .card-title a:hover {
+        color: var(--accent-color);
+      }
+
+      /* 评分样式 */
+      .ratings {
+        background-color: var(--light-gray);
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+      }
+
+      .ratings p {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        color: var(--secondary-color);
+      }
+
+      .badge {
+        padding: 0.5em 1em;
+        font-weight: 500;
+        border-radius: 20px;
+        font-size: 0.9em;
+      }
+
+      .badge.bg-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+      }
+
+      /* 区块标题样式 */
+      section {
+        margin-bottom: 3rem;
+      }
+
+      section h2 {
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+        display: inline-block;
+      }
+
+      section h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to right, var(--accent-color), transparent);
+      }
+
+      /* 列表组样式 */
+      .list-group-item {
+        border: none;
+        border-radius: 8px !important;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        background-color: var(--light-gray);
+      }
+
+      .list-group-item:hover {
+        background-color: white;
+        transform: translateX(5px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      /* 页脚样式 */
+      footer {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2rem 0;
+        margin-top: 4rem;
+      }
+
+      footer p {
+        opacity: 0.9;
+      }
+
+      /* 响应式调整 */
+      @media (max-width: 768px) {
+        .card {
+          margin-bottom: 1rem;
+        }
+        
+        section h2 {
+          font-size: 1.5rem;
+        }
+
+        .container {
+          padding-left: 1rem;
+          padding-right: 1rem;
+        }
+      }
+
+      /* 动画效果 */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* 自定义滚动条 */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--light-gray);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 4px;
+      }
+
+      /* 餐厅卡片特殊样式 */
+      .restaurant-card {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .restaurant-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+      }
+
+      /* 评分标签样式 */
+      .rating-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        background-color: rgba(44, 62, 80, 0.1);
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+
+      .rating-tag i {
+        color: var(--accent-color);
+      }
+
+      /* 导航栏按钮样式 */
+      .nav-btn {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.85);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .nav-btn:hover {
+        color: #fff;
+      }
+
+      .nav-btn i {
+        margin-right: 0.5rem;
+      }
+
+      /* 确保导航项垂直对齐 */
+      .navbar-nav {
+        align-items: center;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'recommender:home' %}">
+          <i class="fas fa-utensils me-2"></i>餐厅推荐
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'recommender:home' %}">
+                <i class="fas fa-home me-1"></i>首页
+              </a>
+            </li>
+          </ul>
+          <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+            <li class="nav-item">
+              <span class="nav-link">
+                <i class="fas fa-user me-1"></i>欢迎, {{ user.username }}
+              </span>
+            </li>
+            <li class="nav-item">
+              <form method="post" action="{% url 'recommender:logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="nav-btn">
+                  <i class="fas fa-sign-out-alt"></i>退出
+                </button>
+              </form>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'recommender:login' %}">
+                <i class="fas fa-sign-in-alt me-1"></i>登录
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'recommender:register' %}">
+                <i class="fas fa-user-plus me-1"></i>注册
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="py-4">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <h5><i class="fas fa-utensils me-2"></i>餐厅推荐系统</h5>
+            <p class="mb-0">发现您的美食之旅</p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <p class="mb-0">&copy; 2024 餐厅推荐系统. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
